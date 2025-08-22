@@ -159,7 +159,7 @@ from copy import deepcopy
 # print(djikstraSet(6, adList, 0))
 # We can omit the extra time complexity for priority queue by taking a queue in grid type problems.
 # It is because moving from one element to other always takes 1 distance which is different from the weights problem
-# where weights are different and we require the minimum.
+# where weights are different and we require the minimum. It is not like you will not get the answer with queue but with minHeap you will eliminate the longer path in each iteration.
 
 # Bellman ford Algorithm - It is used to find the shortest path and it is applicable in directed graph.
 # It does not work for cycles. The edges can be in any order.
