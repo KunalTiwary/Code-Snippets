@@ -169,16 +169,17 @@ from copy import deepcopy
 # def bellmanFord(n, edges, s):
 #     dist = [float("inf") for _ in range(n)]
 #     dist[s] = 0
-#     for i in range(n-1):
+#     for i in range(n-1): # relaxing n-1 times
 #         for e in edges:
 #             u, v, w = e[0], e[1], e[2]
 #             if dist[u] < float("inf") and dist[u] + w < dist[v]:
-#                 dist[v] = dist[u] + w
+#                 dist[v] = dist[u] + w # relaxing
 #     return dist
 #
 #
 # print(bellmanFord(6, [(3,2,6), (5,3,1), (0,1,5), (1,5,-3), (1,2,-2), (3,4,-2), (2,4,3)], 0))
 
+# The relaxation cannot happen after n-1 iterations but if it is happening means there is a negative cycle (total sum of weights in a cycle is -ve). 
 # def bellmanFordCheckCycle(n, edges, s):
 #     dist = [float("inf") for _ in range(n)]
 #     dist[s] = 0
