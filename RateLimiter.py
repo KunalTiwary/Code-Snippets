@@ -361,3 +361,99 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+# app = FastAPI()
+# @app.get("/data")
+# @rate_limit(type="token_bucket", limit=5, per=10)
+# def get_data():
+#     return {"msg": "Success!"}
+
+
+# storage.py(for persistence)
+import time
+from abc import ABC, abstractmethod
+
+class Storage:
+    def __init__(self, store):
+        self.store = store
+        pass
+
+    @abstractmethod
+    def get(self, key):
+        pass
+    
+    @abstractmethod
+    def set(self, key, value):
+        pass
+
+    @abstractmethod
+    def delete(self, key):
+        pass
+
+
+import threading
+
+class InMemoryStore:
+    # make this singleton
+    _object = None
+    _lock = threading.Lock()
+    
+    def __new__(cls):
+        with cls._lock:
+            if cls._object == None:
+                cls._object = super(InMemoryStore, cls).__new__(cls)
+                cls._object.store = {}
+        return cls._object
+
+    @abstractmethod
+    def getInstance(cls):
+        return InMemoryStore()
+
+    
+    def get(self, key):
+        return self.store.get(key)
+
+    def set(self, key, value):
+        self.store[key] = value
+
+    def delete(self, key):
+        del self.store[key]
+
+from threading import Lock
+from collections import deque
+
+
+class FixedWindowRateLimiter:
+    pass
+
+# factory.py # if you add it later
+class RateLimiterFactory:
+
+    def get_rate_limiter(self, limiter_type, key, max_requests, window_seconds, storage):
+        if limiter_type == "token_bucket":
+            return FixedWindowRateLimiter(key, max_requests, window_seconds, storage)
+        # elif limiter_type == "leaky_bucket":
+            # return LeakyBucketLimiter(key, max_requests, window_seconds, storage)
+        else:
+            raise ValueError(f"Unknown rate limiter type: {limiter_type}")
+
+
+from functools import wraps
+class Decorator:
+    def __init__(self) -> None:
+        self.store = InMemoryStore()  # shared singleton
+        self.RateLimiterFactory = RateLimiterFactory()
+
+    def rate_limit(self, type, limit=10, per=60):
+        def decorator(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                key = f"{func.__name__}"  # could use user_id, IP, etc.
+                limiter = self.RateLimiterFactory.get_rate_limiter(type, key, limit, per, self.store)
+                if not limiter.allow_request():
+                    return {"error": "Too Many Requests"}, 429
+                return func(*args, **kwargs)
+            return wrapper
+        return decorator
